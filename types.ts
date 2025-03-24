@@ -6,9 +6,9 @@ interface ExactInputSingleParams {
   fee: number;
   recipient: string;
   deadline: number;
-  amountIn: BigNumberish;
-  amountOutMinimum: BigNumberish;
-  sqrtPriceLimitX96: BigNumberish;
+  amountIn: BigInt;
+  amountOutMinimum: BigInt;
+  sqrtPriceLimitX96: BigInt;
 }
 
 export { ExactInputSingleParams };

@@ -79,6 +79,33 @@ export class DragonSwap {
     const receiptApprove = await approveTx.wait();
     console.log("Approved tokenIn", receiptApprove);
 
+    const poolAddress = await this.factoryContract.getPool(
+      params.tokenIn,
+      params.tokenOut,
+      params.fee
+    );
+    console.log("Pool", poolAddress);
+
+    const pool_swap_abi = [
+      "function swap(address recipient, bool zeroForOne, int256 amountSpecified, int256 sqrtPriceLimitX96) external returns (int256 amount0, int256 amount1)",
+    ];
+    const poolContract = new Contract(poolAddress, pool_swap_abi, this.signer);
+    // Approve the pool to spend the input token
+    const approvePoolTx = await tokenInContract.approve(
+      poolAddress,
+      params.amountIn
+    );
+    const receiptApprovePool = await approvePoolTx.wait();
+    console.log("Approved pool", receiptApprovePool);
+    const swapThroughPool = await poolContract.callStatic.swap(
+      params.recipient,
+      true,
+      params.amountIn,
+      params.sqrtPriceLimitX96
+    );
+    await swapThroughPool.wait();
+    console.log("Swapped through pool", swapThroughPool);
+
     const swapTx = await this.routerContract.exactInputSingle(params);
     const receiptSwap = await swapTx.wait();
     console.log("Swapped", receiptSwap);

@@ -16,10 +16,11 @@ async function main() {
     tokenOut: "0x5cf6826140c1c56ff49c808a1a75407cd1df9423", // ISEI
     recipient: "0xe98493c9943097f1127dd1c55257fba8ed2e3211",
     deadline: Math.floor(Date.now() / 1000) + 60 * 20, // 20 minutes from now (late af)
-    amountIn: "500000000000000000", // 1 token assuming 18 decimals
-    amountOutMinimum: "5000000", // tiny amount of output that should always be receiveed
+
+    amountIn: BigInt(500000000000000000), // 1 token assuming 18 decimals
+    amountOutMinimum: BigInt(5000000), // tiny amount of output that should always be receiveed
     fee: 500, // 0.05%
-    sqrtPriceLimitX96: 0,
+    sqrtPriceLimitX96: BigInt(0),
   };
 
   await dragonSwap.exactInputSingle(params);
