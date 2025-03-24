@@ -1,18 +1,22 @@
 import { isAddress } from "ethers";
+import { ExactInputSingleParams } from "./types";
 import { JsonRpcProvider } from "ethers";
 import { Wallet } from "ethers";
 import { Contract } from "ethers";
 import * as dotenv from "dotenv";
+const routerAbi = require("./routerAbi.json");
+const factoryAbi = require("./factoryAbi.json");
 dotenv.config();
 
 export class DragonSwap {
   private readonly DRAGONSWAP_V2_SWAP_ROUTER_ADDRESS: string;
   private readonly DRAGONSWAP_V2_FACTORY_ADDRESS: string;
   private readonly RPC_URL: string;
-  private readonly contractAddress: string;
+  // private readonly contractAddress: string;
   private readonly signer: Wallet;
   private readonly provider: JsonRpcProvider;
   private readonly routerContract: Contract;
+  private readonly factoryContract: Contract;
 
   constructor(privateKey: string) {
     const {
@@ -41,17 +45,23 @@ export class DragonSwap {
     this.provider = new JsonRpcProvider(this.RPC_URL);
     this.signer = new Wallet(privateKey, this.provider);
 
-    const TODO_ABI = [];
-    const TODO_ABI_FACTORY = [];
-    const routerContract = new Contract(
+    this.routerContract = new Contract(
       this.DRAGONSWAP_V2_SWAP_ROUTER_ADDRESS,
-      TODO_ABI,
+      routerAbi,
       this.signer
     );
-    const factoryContract = new Contract(
+    this.factoryContract = new Contract(
       this.DRAGONSWAP_V2_FACTORY_ADDRESS,
-      TODO_ABI_FACTORY,
+      factoryAbi,
       this.signer
     );
+  }
+
+  /**
+   * Swap an exact input amount of an input token for as much output as possible.
+   * @param params - An object containing swap parameters (tokenIn, tokenOut, etc.)
+   **/
+  exactInputSingle(params: ExactInputSingleParams) {
+    this.routerContract.exactInputSingle(params);
   }
 }
