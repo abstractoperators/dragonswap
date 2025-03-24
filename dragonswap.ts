@@ -4,8 +4,8 @@ import { JsonRpcProvider } from "ethers";
 import { Wallet } from "ethers";
 import { Contract } from "ethers";
 import * as dotenv from "dotenv";
-const routerAbi = require("./routerAbi.json");
-const factoryAbi = require("./factoryAbi.json");
+const routerAbi = require("./routerAbi.json")["abi"];
+const factoryAbi = require("./factoryAbi.json")["abi"];
 dotenv.config();
 
 export class DragonSwap {
@@ -61,7 +61,26 @@ export class DragonSwap {
    * Swap an exact input amount of an input token for as much output as possible.
    * @param params - An object containing swap parameters (tokenIn, tokenOut, etc.)
    **/
-  exactInputSingle(params: ExactInputSingleParams) {
-    this.routerContract.exactInputSingle(params);
+  async exactInputSingle(params: ExactInputSingleParams) {
+    console.log(params);
+
+    const { tokenIn } = params;
+    const tokenInContract = new Contract(
+      tokenIn,
+      [
+        "function approve(address spender, uint256 amount) public returns (bool)",
+      ],
+      this.signer
+    );
+    const approveTx = await tokenInContract.approve(
+      this.DRAGONSWAP_V2_SWAP_ROUTER_ADDRESS,
+      params.amountIn
+    );
+    const receiptApprove = await approveTx.wait();
+    console.log("Approved tokenIn", receiptApprove);
+
+    const swapTx = await this.routerContract.exactInputSingle(params);
+    const receiptSwap = await swapTx.wait();
+    console.log("Swapped", receiptSwap);
   }
 }
