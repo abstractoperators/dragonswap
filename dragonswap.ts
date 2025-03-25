@@ -81,24 +81,14 @@ export class DragonSwap {
     const receiptApprove = await approveTx.wait();
     console.log("Approved tokenIn", receiptApprove);
 
-    const poolAddress = await this.factoryContract.getPool(
-      params.tokenIn,
-      params.tokenOut,
-      params.fee
-    );
     const allowance = await tokenInContract.allowance(
       params.recipient,
       this.routerContract.target
     );
     console.log("Allowance:", allowance.toString());
 
-    //@ts-ignore
-    const staticSwap = await this.routerContract.exactInputSingle.staticCall(
-      params
-    );
-    console.log("Static Swap", staticSwap);
-    // const swapTx = await this.routerContract.exactInputSingle(params);
-    // const receiptSwap = await swapTx.wait();
-    // console.log("Swapped", receiptSwap);
+    const swapTx = await this.routerContract.exactInputSingle(params);
+    const receiptSwap = await swapTx.wait();
+    console.log("Swapped", receiptSwap);
   }
 }
