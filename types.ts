@@ -5,7 +5,6 @@ interface ExactInputSingleParams {
   tokenOut: string;
   fee: number;
   recipient: string;
-  deadline: number;
   amountIn: BigInt;
   amountOutMinimum: BigInt;
   sqrtPriceLimitX96: BigInt;
