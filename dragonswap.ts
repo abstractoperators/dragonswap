@@ -59,7 +59,46 @@ export class DragonSwap {
   }
 
   /**
+   * @param tokenIn - The address of the token to swap from.
+   * @param tokenOut - The address of the token to swap to.
+   * @returns The minimum fee for swapping the given tokens in milli-basis points (i.e. 100 = 0.01%). If a pool does not exist for the given tokens, returns undefined.
+   * Note: No guarantees that the pool exists, or that the pool has sufficient liquidity. A pool with minimum fee may also not have the best effective rate.
+   */
+  async findMinFee(tokenIn: string, tokenOut: string) {
+    const fees = [100, 500, 3000, 10000]; // 0.01%, 0.05%, 0.3%, 1%
+    for (const fee of fees) {
+      try {
+        const poolAddress = await this.factoryContract.getPool(
+          tokenIn,
+          tokenOut,
+          fee
+        );
+        console.log("Pool address", poolAddress);
+
+        return fee;
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  }
+  /**
+   * @param tokenIn - The address of the token to swap from.
+   * @param tokenOut - The address of the token to swap to.
+   * @param fee - The fee in milli-basis points (i.e. 100 = 0.01%).
+   * @returns The address of the pool that can be used to swap the given tokens with the given fee. If no pool exists, then it returns 0x00000000....
+   */
+  async findPool(tokenIn: string, tokenOut: string, fee: number) {
+    const poolAddress = await this.factoryContract.getPool(
+      tokenIn,
+      tokenOut,
+      fee
+    );
+    return poolAddress;
+  }
+
+  /**
    * Swap an exact input amount of an input token for as much output as possible.
+   * Single hop, meaning only one pool is used for the swap.
    * @param params - An object containing swap parameters (tokenIn, tokenOut, etc.)
    **/
   async exactInputSingle(params: ExactInputSingleParams) {
@@ -81,14 +120,21 @@ export class DragonSwap {
     const receiptApprove = await approveTx.wait();
     console.log("Approved tokenIn", receiptApprove);
 
-    const allowance = await tokenInContract.allowance(
-      params.recipient,
-      this.routerContract.target
-    );
-    console.log("Allowance:", allowance.toString());
-
     const swapTx = await this.routerContract.exactInputSingle(params);
     const receiptSwap = await swapTx.wait();
     console.log("Swapped", receiptSwap);
+  }
+
+  /**
+   *
+   */
+  async createPool(tokenA: string, tokenB: string, fee: number) {
+    const createPoolTx = await this.factoryContract.createPool(
+      tokenA,
+      tokenB,
+      fee
+    );
+    const receipt = await createPoolTx.wait();
+    console.log("Created pool", receipt);
   }
 }
