@@ -70,6 +70,7 @@ export class DragonSwap {
       tokenIn,
       [
         "function approve(address spender, uint256 amount) public returns (bool)",
+        "function allowance(address owner, address spender) public view returns (uint256)",
       ],
       this.signer
     );
@@ -85,24 +86,17 @@ export class DragonSwap {
       params.tokenOut,
       params.fee
     );
-    console.log("Pool", poolAddress);
-
-    const poolContract = new Contract(poolAddress, poolAbi, this.signer);
-    const approvePoolTx = await tokenInContract.approve(
-      poolAddress,
-      params.amountIn
-    );
-    const receiptApprovePool = await approvePoolTx.wait();
-    console.log("Approved pool", receiptApprovePool);
-    const swapThroughPool = await poolContract.swap(
+    const allowance = await tokenInContract.allowance(
       params.recipient,
-      false,
-      params.amountIn,
-      params.sqrtPriceLimitX96
+      this.routerContract.target
     );
-    await swapThroughPool.wait();
-    console.log("Swapped through pool", swapThroughPool);
+    console.log("Allowance:", allowance.toString());
 
+    //@ts-ignore
+    const staticSwap = await this.routerContract.exactInputSingle.staticCall(
+      params
+    );
+    console.log("Static Swap", staticSwap);
     // const swapTx = await this.routerContract.exactInputSingle(params);
     // const receiptSwap = await swapTx.wait();
     // console.log("Swapped", receiptSwap);

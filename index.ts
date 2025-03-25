@@ -17,10 +17,10 @@ async function main() {
     recipient: "0xe98493c9943097f1127dd1c55257fba8ed2e3211",
     deadline: Math.floor(Date.now() / 1000) + 60 * 20, // 20 minutes from now (late af)
 
-    amountIn: BigInt(500000000000000000), // 1 token assuming 18 decimals
-    amountOutMinimum: BigInt(5000000), // tiny amount of output that should always be receiveed
+    amountIn: BigInt("500000000000000000"), // 1 token assuming 18 decimals
+    amountOutMinimum: BigInt("5000000"), // tiny amount of output that should always be receiveed
     fee: 500, // 0.05%
-    sqrtPriceLimitX96: BigInt(0),
+    sqrtPriceLimitX96: BigInt("0"),
   };
 
   await dragonSwap.exactInputSingle(params);
