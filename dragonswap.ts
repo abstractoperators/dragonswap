@@ -1,5 +1,5 @@
 import { isAddress } from "ethers";
-import { ExactInputSingleParams } from "./types";
+import { ExactInputSingleParams, ExactOutputSingleParams } from "./types";
 import { JsonRpcProvider } from "ethers";
 import { Wallet } from "ethers";
 import { Contract } from "ethers";
@@ -121,6 +121,35 @@ export class DragonSwap {
     console.log("Approved tokenIn", receiptApprove);
 
     const swapTx = await this.routerContract.exactInputSingle(params);
+    const receiptSwap = await swapTx.wait();
+    console.log("Swapped", receiptSwap);
+  }
+
+  /**
+   * Swaps as little  as possible of one token for amountOut of another token that may remain in the router after the swap.
+   * @params params
+   */
+  async exactOutputSingle(params: ExactOutputSingleParams) {
+    console.log(params);
+
+    const { tokenIn } = params;
+    const tokenInContract = new Contract(
+      tokenIn,
+      [
+        "function approve(address spender, uint256 amount) public returns (bool)",
+        "function allowance(address owner, address spender) public view returns (uint256)",
+      ],
+      this.signer
+    );
+    const approveTx = await tokenInContract.approve(
+      this.DRAGONSWAP_V2_SWAP_ROUTER_ADDRESS,
+      params.amountInMaximum
+    );
+
+    const receiptApprove = await approveTx.wait();
+    console.log("Approved tokenIn", receiptApprove);
+
+    const swapTx = await this.routerContract.exactOutputSingle(params);
     const receiptSwap = await swapTx.wait();
     console.log("Swapped", receiptSwap);
   }
